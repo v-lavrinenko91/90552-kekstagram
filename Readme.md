@@ -1,7 +1,7 @@
 # Личный проект «Кекстаграм» [![Build status][travis-image]][travis-url]
 
 * Студент: [Vasilii Lavrinenko](https://up.htmlacademy.ru/javascript/9/user/90552).
-* Наставник: `Неизвестно`.
+* Наставник:[Михаил Баранов](https://htmlacademy.ru/profile/id14760).
 
 ---
 
