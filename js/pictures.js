@@ -2,19 +2,27 @@
 
 var pictureTemplate = document.querySelector('#picture-template').content;
 var pictureBlock = document.querySelector('.pictures');
-var comments = ['Всё отлично!'];
+var postElement = document.querySelector('.gallery-overlay');
+var comments = [];
+comments.push('Всё отлично!');
 comments.push('В целом всё неплохо. Но не всё.');
 comments.push('Когда вы делаете фотографию, хорошо бы убирать палец из кадра. В конце-концов это просто непрофессионально.');
 comments.push('Моя бабушка случайно чихнула с фотоаппаратом в руках и у неё получилась фотография лучше.');
 comments.push('Я поскользнулся на банановой кожуре и уронил фотоаппарат на кота и у меня получилась фотография лучше.');
 comments.push('Лица у людей на фотке перекошены, как-будто их избивают. Как можно было поймать такой неудачный момент?!');
+var PICTURES_AMOUNT = 25;
+var picturesList = createPicturesList(PICTURES_AMOUNT);
+
+function getRandomNumber(minValue, maxValue) {
+  return minValue + Math.floor(Math.random() * (maxValue + 1 - minValue));
+}
 
 function generatePicture() {
-  var pictureLikes = 15 + Math.floor(Math.random() * 186);
-  var commentsAmmount = 1 + Math.floor(Math.random() * 2);
+  var pictureLikes = getRandomNumber(15, 200);
+  var commentsAmmount = getRandomNumber(1, 2);
   var pictureComments = [''];
   for (var i = 0; i < commentsAmmount; i++) {
-    var index = Math.floor(Math.random() * comments.length);
+    var index = getRandomNumber(0, comments.length - 1);
     pictureComments[i] = comments[index];
     comments.slice(index, 1);
   }
@@ -25,9 +33,9 @@ function generatePicture() {
   };
 }
 
-function createPicturesList(listLength) {
+function createPicturesList(picturesCount) {
   var pictures = [];
-  for (var i = 0; i < listLength; i++) {
+  for (var i = 0; i < picturesCount; i++) {
     var picture = generatePicture();
     picture.url = 'photos/' + (i + 1) + '.jpg';
     pictures[i] = picture;
@@ -43,27 +51,33 @@ function renderPicture(picture) {
   return pictureElement;
 }
 
-function addPictures() {
+function createPicturesNode() {
   var fragment = document.createDocumentFragment();
-  var picturesList = createPicturesList(25);
   for (var i = 0; i < picturesList.length; i++) {
     fragment.appendChild(renderPicture(picturesList[i]));
   }
-  pictureBlock.appendChild(fragment);
-  return picturesList;
+  return fragment;
 }
 
 function hideCroppingForm() {
   document.querySelector('.upload-overlay').classList.add('invisible');
 }
 
-function showPost(picturesList) {
-  var postElement = document.querySelector('.gallery-overlay');
-  postElement.classList.remove('invisible');
+function addPictures() {
+  pictureBlock.appendChild(createPicturesNode());
+}
+
+function renderPost() {
   postElement.querySelector('.gallery-overlay-image').setAttribute('src', picturesList[0].url);
   postElement.querySelector('.likes-count').textContent = picturesList[0].likes;
   postElement.querySelector('.comments-count').textContent = picturesList[0].comments.length;
 }
 
+function showPost() {
+  postElement.classList.remove('invisible');
+}
+
 hideCroppingForm();
-showPost(addPictures());
+addPictures();
+renderPost();
+showPost();
