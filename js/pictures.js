@@ -6,6 +6,8 @@ var postElement = document.querySelector('.gallery-overlay');
 var postElementClose = postElement.querySelector('.gallery-overlay-close');
 var upload = document.querySelector('.upload');
 var uploadComment = upload.querySelector('.upload-form-description');
+var uploadForm = upload.querySelector('#upload-select-image');
+var uploadFile = upload.querySelector('#upload-file');
 var croppingFormClose = upload.querySelector('.upload-form-cancel');
 var croppingFormSubmitBtn = upload.querySelector('.upload-form-submit');
 var comments = [];
@@ -133,7 +135,7 @@ function closeCroppingForm() {
 }
 
 function openLoadForm() {
-  upload.querySelector('#upload-select-image').classList.remove('invisible');
+  uploadForm.classList.remove('invisible');
 }
 
 function closeLoadForm() {
@@ -168,24 +170,33 @@ function onCroppingFormSubmitBtnEnterPress(evt) {
   }
 }
 
+function addOpenPostClickListener() {
+  pictureBlock.addEventListener('click', function (evt) {
+    evt.preventDefault();
+    if (evt.target.tagName === 'IMG') {
+      openPost(evt.target.getAttribute('src'));
+    }
+  });
+}
+
+function addOpenPostKeyDownListener() {
+  pictureBlock.addEventListener('keydown', function (evt) {
+    if (evt.keyCode === 13) {
+      openPost(evt.target.getAttribute('src'));
+    }
+  });
+}
+
+function addLoadFormChangeListener() {
+  uploadFile.addEventListener('change', function () {
+    openCroppingForm();
+    closeLoadForm();
+  });
+}
+
 addPictures();
 closeCroppingForm();
 openLoadForm();
-
-pictureBlock.addEventListener('click', function (evt) {
-  evt.preventDefault();
-  if (evt.target.tagName === 'IMG') {
-    openPost(evt.target.getAttribute('src'));
-  }
-});
-
-pictureBlock.addEventListener('keydown', function (evt) {
-  if (evt.keyCode === 13) {
-    openPost(evt.target.getAttribute('src'));
-  }
-});
-
-upload.querySelector('#upload-file').onchange = function () {
-  openCroppingForm();
-  closeLoadForm();
-};
+addOpenPostClickListener();
+addOpenPostKeyDownListener();
+addLoadFormChangeListener();
