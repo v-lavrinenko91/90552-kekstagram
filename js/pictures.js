@@ -3,6 +3,13 @@
 var pictureTemplate = document.querySelector('#picture-template').content;
 var pictureBlock = document.querySelector('.pictures');
 var postElement = document.querySelector('.gallery-overlay');
+var postElementClose = postElement.querySelector('.gallery-overlay-close');
+var upload = document.querySelector('.upload');
+var uploadComment = upload.querySelector('.upload-form-description');
+var uploadForm = upload.querySelector('#upload-select-image');
+var uploadFile = upload.querySelector('#upload-file');
+var croppingFormClose = upload.querySelector('.upload-form-cancel');
+var croppingFormSubmitBtn = upload.querySelector('.upload-form-submit');
 var comments = [];
 comments.push('Всё отлично!');
 comments.push('В целом всё неплохо. Но не всё.');
@@ -46,6 +53,7 @@ function createPicturesList(picturesCount) {
 function renderPicture(picture) {
   var pictureElement = pictureTemplate.cloneNode(true);
   pictureElement.querySelector('img').setAttribute('src', picture.url);
+  pictureElement.querySelector('img').setAttribute('tabindex', '0');
   pictureElement.querySelector('.picture-likes').textContent = picture.likes;
   pictureElement.querySelector('.picture-comments').textContent = picture.comments.length;
   return pictureElement;
@@ -59,25 +67,136 @@ function createPicturesNode() {
   return fragment;
 }
 
-function hideCroppingForm() {
-  document.querySelector('.upload-overlay').classList.add('invisible');
-}
-
 function addPictures() {
   pictureBlock.appendChild(createPicturesNode());
 }
 
-function renderPost() {
-  postElement.querySelector('.gallery-overlay-image').setAttribute('src', picturesList[0].url);
-  postElement.querySelector('.likes-count').textContent = picturesList[0].likes;
-  postElement.querySelector('.comments-count').textContent = picturesList[0].comments.length;
+function renderPost(elem) {
+  postElement.querySelector('.gallery-overlay-image').setAttribute('src', elem.url);
+  postElement.querySelector('.likes-count').textContent = elem.likes;
+  postElement.querySelector('.comments-count').textContent = elem.comments.length;
 }
 
-function showPost() {
+function compareSrc(src) {
+  var foundItem = null;
+  for (var i = 0; i < picturesList.length; i++) {
+    if (picturesList[i].url === src) {
+      foundItem = picturesList[i];
+    }
+  }
+  return foundItem;
+}
+
+function openPost(pictureSrc) {
+  renderPost(compareSrc(pictureSrc));
   postElement.classList.remove('invisible');
+  postElementClose.addEventListener('click', closePost);
+  document.addEventListener('keydown', onEscPressPost);
+  postElementClose.addEventListener('keydown', onPostCloseBtnEnterPress);
 }
 
-hideCroppingForm();
+function closePost() {
+  postElement.classList.add('invisible');
+  postElementClose.removeEventListener('click', closePost);
+  document.removeEventListener('keydown', onEscPressPost);
+  postElementClose.removeEventListener('keydown', onPostCloseBtnEnterPress);
+}
+
+function onEscPressPost(evt) {
+  if (evt.keyCode === 27) {
+    closePost();
+  }
+}
+
+function onPostCloseBtnEnterPress(evt) {
+  if (evt.keyCode === 13) {
+    closePost();
+  }
+}
+
+function openCroppingForm() {
+  upload.querySelector('.upload-overlay').classList.remove('invisible');
+  upload.querySelector('.upload-form-cancel').addEventListener('click', function () {
+    closeCroppingForm();
+    openLoadForm();
+  });
+  document.addEventListener('keydown', onEscPressCroppingForm);
+  croppingFormClose.addEventListener('click', onCroppingFormCloseEnterPress);
+  croppingFormSubmitBtn.addEventListener('click', onCroppingFormSubmitBtnClick);
+  croppingFormSubmitBtn.addEventListener('keydown', onCroppingFormSubmitBtnEnterPress);
+}
+
+function closeCroppingForm() {
+  upload.querySelector('.upload-overlay').classList.add('invisible');
+  document.removeEventListener('keydown', onEscPressCroppingForm);
+  croppingFormClose.removeEventListener('click', onCroppingFormCloseEnterPress);
+  croppingFormSubmitBtn.removeEventListener('click', onCroppingFormSubmitBtnClick);
+  croppingFormSubmitBtn.removeEventListener('keydown', onCroppingFormSubmitBtnEnterPress);
+}
+
+function openLoadForm() {
+  uploadForm.classList.remove('invisible');
+}
+
+function closeLoadForm() {
+  upload.querySelector('#upload-select-image').classList.add('invisible');
+}
+
+function onEscPressCroppingForm(evt) {
+  if (evt.keyCode === 27 && document.activeElement !== uploadComment) {
+    closeCroppingForm();
+    openLoadForm();
+  }
+}
+
+function onCroppingFormCloseEnterPress(evt) {
+  if (evt.keyCode === 13 && document.activeElement === closeCroppingForm) {
+    closeCroppingForm();
+    openLoadForm();
+  }
+}
+
+function onCroppingFormSubmitBtnClick(evt) {
+  evt.preventDefault();
+  closeCroppingForm();
+  openLoadForm();
+}
+
+function onCroppingFormSubmitBtnEnterPress(evt) {
+  evt.preventDefault();
+  if (evt.keyCode === 13 && document.activeElement === croppingFormSubmitBtn) {
+    closeCroppingForm();
+    openLoadForm();
+  }
+}
+
+function addOpenPostClickListener() {
+  pictureBlock.addEventListener('click', function (evt) {
+    evt.preventDefault();
+    if (evt.target.tagName === 'IMG') {
+      openPost(evt.target.getAttribute('src'));
+    }
+  });
+}
+
+function addOpenPostKeyDownListener() {
+  pictureBlock.addEventListener('keydown', function (evt) {
+    if (evt.keyCode === 13) {
+      openPost(evt.target.getAttribute('src'));
+    }
+  });
+}
+
+function addLoadFormChangeListener() {
+  uploadFile.addEventListener('change', function () {
+    openCroppingForm();
+    closeLoadForm();
+  });
+}
+
 addPictures();
-renderPost();
-showPost();
+closeCroppingForm();
+openLoadForm();
+addOpenPostClickListener();
+addOpenPostKeyDownListener();
+addLoadFormChangeListener();
