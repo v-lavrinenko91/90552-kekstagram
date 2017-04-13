@@ -5,6 +5,13 @@ var pictureBlock = document.querySelector('.pictures');
 var postElement = document.querySelector('.gallery-overlay');
 var postElementClose = postElement.querySelector('.gallery-overlay-close');
 var upload = document.querySelector('.upload');
+var uploadOverlay = upload.querySelector('.upload-overlay');
+var resizeControlValue = uploadOverlay.querySelector('.upload-resize-controls-value');
+var resizeControlDec = uploadOverlay.querySelector('.upload-resize-controls-button-dec');
+var resizeControlInc = uploadOverlay.querySelector('.upload-resize-controls-button-inc');
+var uploadFilterControls = uploadOverlay.querySelector('.upload-filter-controls');
+var filterImagePreview = uploadOverlay.querySelector('.filter-image-preview');
+var commentField = uploadOverlay.querySelector('textarea');
 var uploadComment = upload.querySelector('.upload-form-description');
 var uploadForm = upload.querySelector('#upload-select-image');
 var uploadFile = upload.querySelector('#upload-file');
@@ -124,6 +131,8 @@ function openCroppingForm() {
   croppingFormClose.addEventListener('click', onCroppingFormCloseEnterPress);
   croppingFormSubmitBtn.addEventListener('click', onCroppingFormSubmitBtnClick);
   croppingFormSubmitBtn.addEventListener('keydown', onCroppingFormSubmitBtnEnterPress);
+  uploadResizeControl();
+  changeFilter();
 }
 
 function closeCroppingForm() {
@@ -157,16 +166,14 @@ function onCroppingFormCloseEnterPress(evt) {
 }
 
 function onCroppingFormSubmitBtnClick(evt) {
-  evt.preventDefault();
-  closeCroppingForm();
-  openLoadForm();
+  event.preventDefault();
+  trySubmitForm();
 }
 
 function onCroppingFormSubmitBtnEnterPress(evt) {
-  evt.preventDefault();
   if (evt.keyCode === 13 && document.activeElement === croppingFormSubmitBtn) {
-    closeCroppingForm();
-    openLoadForm();
+    evt.preventDefault();
+    trySubmitForm();
   }
 }
 
@@ -191,6 +198,72 @@ function addLoadFormChangeListener() {
   uploadFile.addEventListener('change', function () {
     openCroppingForm();
     closeLoadForm();
+  });
+}
+
+function isCommentSizeValid() {
+  var commentSize = commentField.value.length;
+  return commentSize < 30 ? false : true;
+}
+
+function setDefaultValues() {
+  resizeControlValue.setAttribute('value', '100%');
+  if (filterImagePreview.classList.length > 1) {
+    var removeClass = filterImagePreview.classList[1];
+    filterImagePreview.classList.remove(removeClass);
+  }
+  commentField.setAttribute('value', '');
+}
+
+function trySubmitForm() {
+  if (isCommentSizeValid()) {
+    uploadForm.submit();
+    setDefaultValues();
+  } else {
+    commentField.setAttribute('style', 'border: 2px solid red;');
+  }
+}
+
+function uploadResizeControl() {
+  var str = resizeControlValue.getAttribute('value');
+  var value = parseInt(str.substring(0, str.length - 1), 10);
+  var step = 25;
+  var minValue = 25;
+  var maxValue = 100;
+  var decValue = function () {
+    if (value !== minValue) {
+      value = value - step;
+    }
+    setValue();
+  };
+  var incValue = function () {
+    if (value !== maxValue) {
+      value = value + step;
+    }
+    setValue();
+  };
+
+  function setValue() {
+    resizeControlValue.setAttribute('value', value + '%');
+    if (value !== 100) {
+      filterImagePreview.setAttribute('style', 'transform: scale(0.' + value + ')');
+    } else {
+      filterImagePreview.setAttribute('style', 'transform: scale(1)');
+    }
+  }
+
+  resizeControlDec.addEventListener('click', decValue);
+  resizeControlInc.addEventListener('click', incValue);
+}
+
+function changeFilter() {
+  uploadFilterControls.addEventListener('click', function (evt) {
+    var filterClass = evt.target.getAttribute('id');
+    if (filterImagePreview.classList.length > 1) {
+      var removeClass = filterImagePreview.classList[1];
+      filterImagePreview.classList.remove(removeClass);
+    }
+    filterImagePreview.classList.add(filterClass.substring(7, filterClass.length));
   });
 }
 
