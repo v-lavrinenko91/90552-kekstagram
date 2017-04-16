@@ -67,10 +67,10 @@ function addPictures() {
   pictureBlock.appendChild(createPicturesNode());
 }
 
-function renderPost() {
-  postElement.querySelector('.gallery-overlay-image').setAttribute('src', picturesList[0].url);
-  postElement.querySelector('.likes-count').textContent = picturesList[0].likes;
-  postElement.querySelector('.comments-count').textContent = picturesList[0].comments.length;
+function renderPost(elem) {
+  postElement.querySelector('.gallery-overlay-image').setAttribute('src', elem.url);
+  postElement.querySelector('.likes-count').textContent = elem.likes;
+  postElement.querySelector('.comments-count').textContent = elem.comments.length;
 }
 
 function showPost() {
@@ -79,5 +79,9 @@ function showPost() {
 
 hideCroppingForm();
 addPictures();
-renderPost();
-showPost();
+pictureBlock.addEventListener('click', function (evt) {
+  evt.preventDefault();
+  var src = evt.target.attributes.src;
+  console.log(src);
+  // showPost();
+});
