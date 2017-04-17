@@ -26,6 +26,7 @@ comments.push('Я поскользнулся на банановой кожур�
 comments.push('Лица у людей на фотке перекошены, как-будто их избивают. Как можно было поймать такой неудачный момент?!');
 var PICTURES_AMOUNT = 25;
 var picturesList = createPicturesList(PICTURES_AMOUNT);
+var currentFilter = 'filter-none';
 
 function getRandomNumber(minValue, maxValue) {
   return minValue + Math.floor(Math.random() * (maxValue + 1 - minValue));
@@ -203,16 +204,14 @@ function addLoadFormChangeListener() {
 
 function isCommentSizeValid() {
   var commentSize = commentField.value.length;
-  return commentSize < 30 ? false : true;
+  return commentSize >= 30 && commentSize <= 100;
 }
 
 function setDefaultValues() {
-  resizeControlValue.setAttribute('value', '100%');
-  if (filterImagePreview.classList.length > 1) {
-    var removeClass = filterImagePreview.classList[1];
-    filterImagePreview.classList.remove(removeClass);
+  resizeControlValue.value = '100%';
+  if (filterImagePreview.classList.contains(currentFilter)) {
+    filterImagePreview.classList.remove(currentFilter);
   }
-  commentField.setAttribute('value', '');
 }
 
 function trySubmitForm() {
@@ -220,12 +219,12 @@ function trySubmitForm() {
     uploadForm.submit();
     setDefaultValues();
   } else {
-    commentField.setAttribute('style', 'border: 2px solid red;');
+    commentField.classList.add('upload-message-error');
   }
 }
 
 function uploadResizeControl() {
-  var str = resizeControlValue.getAttribute('value');
+  var str = resizeControlValue.value;
   var value = parseInt(str.substring(0, str.length - 1), 10);
   var step = 25;
   var minValue = 25;
@@ -244,12 +243,9 @@ function uploadResizeControl() {
   };
 
   function setValue() {
-    resizeControlValue.setAttribute('value', value + '%');
-    if (value !== 100) {
-      filterImagePreview.setAttribute('style', 'transform: scale(0.' + value + ')');
-    } else {
-      filterImagePreview.setAttribute('style', 'transform: scale(1)');
-    }
+    var scaleValue = value / maxValue;
+    resizeControlValue.value = value + '%';
+    filterImagePreview.setAttribute('style', 'transform: scale(' + scaleValue + ')');
   }
 
   resizeControlDec.addEventListener('click', decValue);
@@ -258,12 +254,12 @@ function uploadResizeControl() {
 
 function changeFilter() {
   uploadFilterControls.addEventListener('click', function (evt) {
-    var filterClass = evt.target.getAttribute('id');
-    if (filterImagePreview.classList.length > 1) {
-      var removeClass = filterImagePreview.classList[1];
-      filterImagePreview.classList.remove(removeClass);
+    var filterClass = evt.target.value;
+    if (filterImagePreview.classList.contains(currentFilter)) {
+      filterImagePreview.classList.remove(currentFilter);
     }
-    filterImagePreview.classList.add(filterClass.substring(7, filterClass.length));
+    currentFilter = 'filter-' + filterClass;
+    filterImagePreview.classList.add(currentFilter);
   });
 }
 
