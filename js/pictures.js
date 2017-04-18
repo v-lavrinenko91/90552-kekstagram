@@ -209,9 +209,7 @@ function isCommentSizeValid() {
 
 function setDefaultValues() {
   resizeControlValue.value = '100%';
-  if (filterImagePreview.classList.contains(currentFilter)) {
-    filterImagePreview.classList.remove(currentFilter);
-  }
+  filterImagePreview.classList.remove(currentFilter);
 }
 
 function trySubmitForm() {
@@ -255,9 +253,7 @@ function uploadResizeControl() {
 function changeFilter() {
   uploadFilterControls.addEventListener('click', function (evt) {
     var filterClass = evt.target.value;
-    if (filterImagePreview.classList.contains(currentFilter)) {
-      filterImagePreview.classList.remove(currentFilter);
-    }
+    filterImagePreview.classList.remove(currentFilter);
     currentFilter = 'filter-' + filterClass;
     filterImagePreview.classList.add(currentFilter);
   });
