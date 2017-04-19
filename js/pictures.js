@@ -1,3 +1,4 @@
+
 'use strict';
 
 var pictureTemplate = document.querySelector('#picture-template').content;
@@ -5,6 +6,13 @@ var pictureBlock = document.querySelector('.pictures');
 var postElement = document.querySelector('.gallery-overlay');
 var postElementClose = postElement.querySelector('.gallery-overlay-close');
 var upload = document.querySelector('.upload');
+var uploadOverlay = upload.querySelector('.upload-overlay');
+var resizeControlValue = uploadOverlay.querySelector('.upload-resize-controls-value');
+var resizeControlDec = uploadOverlay.querySelector('.upload-resize-controls-button-dec');
+var resizeControlInc = uploadOverlay.querySelector('.upload-resize-controls-button-inc');
+var uploadFilterControls = uploadOverlay.querySelector('.upload-filter-controls');
+var filterImagePreview = uploadOverlay.querySelector('.filter-image-preview');
+var commentField = uploadOverlay.querySelector('textarea');
 var uploadComment = upload.querySelector('.upload-form-description');
 var uploadForm = upload.querySelector('#upload-select-image');
 var uploadFile = upload.querySelector('#upload-file');
@@ -19,6 +27,7 @@ comments.push('Я поскользнулся на банановой кожур�
 comments.push('Лица у людей на фотке перекошены, как-будто их избивают. Как можно было поймать такой неудачный момент?!');
 var PICTURES_AMOUNT = 25;
 var picturesList = createPicturesList(PICTURES_AMOUNT);
+var currentFilter = 'filter-none';
 
 function getRandomNumber(minValue, maxValue) {
   return minValue + Math.floor(Math.random() * (maxValue + 1 - minValue));
@@ -124,6 +133,8 @@ function openCroppingForm() {
   croppingFormClose.addEventListener('click', onCroppingFormCloseEnterPress);
   croppingFormSubmitBtn.addEventListener('click', onCroppingFormSubmitBtnClick);
   croppingFormSubmitBtn.addEventListener('keydown', onCroppingFormSubmitBtnEnterPress);
+  uploadResizeControl();
+  changeFilter();
 }
 
 function closeCroppingForm() {
@@ -157,16 +168,14 @@ function onCroppingFormCloseEnterPress(evt) {
 }
 
 function onCroppingFormSubmitBtnClick(evt) {
-  evt.preventDefault();
-  closeCroppingForm();
-  openLoadForm();
+  event.preventDefault();
+  trySubmitForm();
 }
 
 function onCroppingFormSubmitBtnEnterPress(evt) {
-  evt.preventDefault();
   if (evt.keyCode === 13 && document.activeElement === croppingFormSubmitBtn) {
-    closeCroppingForm();
-    openLoadForm();
+    evt.preventDefault();
+    trySubmitForm();
   }
 }
 
@@ -191,6 +200,64 @@ function addLoadFormChangeListener() {
   uploadFile.addEventListener('change', function () {
     openCroppingForm();
     closeLoadForm();
+  });
+}
+
+function isCommentSizeValid() {
+  var commentSize = commentField.value.length;
+  return commentSize >= 30 && commentSize <= 100;
+}
+
+function setDefaultValues() {
+  resizeControlValue.value = '100%';
+  filterImagePreview.classList.remove(currentFilter);
+  commentField.value = '';
+}
+
+function trySubmitForm() {
+  if (isCommentSizeValid()) {
+    uploadForm.submit();
+    setDefaultValues();
+  } else {
+    commentField.classList.add('upload-message-error');
+  }
+}
+
+function uploadResizeControl() {
+  var str = resizeControlValue.value;
+  var value = parseInt(str.substring(0, str.length - 1), 10);
+  var step = 25;
+  var minValue = 25;
+  var maxValue = 100;
+  var decValue = function () {
+    if (value !== minValue) {
+      value = value - step;
+    }
+    setValue();
+  };
+  var incValue = function () {
+    if (value !== maxValue) {
+      value = value + step;
+    }
+    setValue();
+  };
+
+  function setValue() {
+    var scaleValue = value / maxValue;
+    resizeControlValue.value = value + '%';
+    filterImagePreview.setAttribute('style', 'transform: scale(' + scaleValue + ')');
+  }
+
+  resizeControlDec.addEventListener('click', decValue);
+  resizeControlInc.addEventListener('click', incValue);
+}
+
+function changeFilter() {
+  uploadFilterControls.addEventListener('click', function (evt) {
+    var filterClass = evt.target.value;
+    filterImagePreview.classList.remove(currentFilter);
+    currentFilter = 'filter-' + filterClass;
+    filterImagePreview.classList.add(currentFilter);
   });
 }
 
