@@ -1,9 +1,9 @@
 'use strict';
 
-window.picture = (function () {
+window.picture = (function (data) {
   var pictureTemplate = document.querySelector('#picture-template').content;
   var PICTURES_AMOUNT = 25;
-  var picturesList = window.data(PICTURES_AMOUNT);
+  var picturesList = data(PICTURES_AMOUNT);
 
   function renderPicture(picture) {
     var pictureElement = pictureTemplate.cloneNode(true);
@@ -27,4 +27,4 @@ window.picture = (function () {
     picturesList: picturesList
   };
 
-})();
+})(window.data);

@@ -1,11 +1,11 @@
 'use strict';
 
-(function () {
+(function (utils, picture, preview) {
   var pictureBlock = document.querySelector('.pictures');
   var postElement = document.querySelector('.gallery-overlay');
   var postElementClose = postElement.querySelector('.gallery-overlay-close');
-  var picturesNode = window.picture.createPicturesNode;
-  var picturesList = window.picture.picturesList;
+  var picturesNode = picture.createPicturesNode;
+  var picturesList = picture.picturesList;
 
   function addPictures() {
     pictureBlock.appendChild(picturesNode());
@@ -22,7 +22,7 @@
   }
 
   function openPost(pictureSrc) {
-    window.post(compareSrc(pictureSrc));
+    preview(compareSrc(pictureSrc));
     postElement.classList.remove('invisible');
     postElementClose.addEventListener('click', closePost);
     document.addEventListener('keydown', onEscPressPost);
@@ -37,13 +37,13 @@
   }
 
   function onEscPressPost(evt) {
-    if (window.utils.isEscPressed(evt)) {
+    if (utils.isEscPressed(evt)) {
       closePost();
     }
   }
 
   function onPostCloseBtnEnterPress(evt) {
-    if (window.utils.isEnterPressed(evt)) {
+    if (utils.isEnterPressed(evt)) {
       closePost();
     }
   }
@@ -59,7 +59,7 @@
 
   function addOpenPostKeyDownListener() {
     pictureBlock.addEventListener('keydown', function (evt) {
-      if (window.utils.isEnterPressed(evt)) {
+      if (utils.isEnterPressed(evt)) {
         openPost(evt.target.getAttribute('src'));
       }
     });
@@ -69,4 +69,4 @@
   addPictures();
   addOpenPostClickListener();
   addOpenPostKeyDownListener();
-})();
+})(window.utils, window.picture, window.preview);

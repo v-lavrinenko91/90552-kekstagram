@@ -1,6 +1,6 @@
 'use strict';
 
-window.post = (function () {
+window.preview = (function () {
   var postElement = document.querySelector('.gallery-overlay');
 
   function renderPost(elem) {

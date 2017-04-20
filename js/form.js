@@ -1,6 +1,6 @@
 'use strict';
 
-(function () {
+(function (utils) {
   var upload = document.querySelector('.upload');
   var uploadOverlay = upload.querySelector('.upload-overlay');
   var resizeControlValue = uploadOverlay.querySelector('.upload-resize-controls-value');
@@ -47,14 +47,14 @@
   }
 
   function onEscPressCroppingForm(evt) {
-    if (window.utils.isEscPressed(evt) && document.activeElement !== uploadComment) {
+    if (utils.isEscPressed(evt) && document.activeElement !== uploadComment) {
       closeCroppingForm();
       openLoadForm();
     }
   }
 
   function onCroppingFormCloseEnterPress(evt) {
-    if (window.utils.isEnterPressed(evt) && document.activeElement === closeCroppingForm) {
+    if (utils.isEnterPressed(evt) && document.activeElement === closeCroppingForm) {
       closeCroppingForm();
       openLoadForm();
     }
@@ -66,7 +66,7 @@
   }
 
   function onCroppingFormSubmitBtnEnterPress(evt) {
-    if (window.utils.isEnterPressed(evt) && document.activeElement === croppingFormSubmitBtn) {
+    if (utils.isEnterPressed(evt) && document.activeElement === croppingFormSubmitBtn) {
       evt.preventDefault();
       trySubmitForm();
     }
@@ -139,4 +139,4 @@
   closeCroppingForm();
   openLoadForm();
   addLoadFormChangeListener();
-})();
+})(window.utils);

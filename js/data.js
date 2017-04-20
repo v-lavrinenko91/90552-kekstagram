@@ -1,6 +1,6 @@
 'use strict';
 
-window.data = (function () {
+window.data = (function (utils) {
   var comments = [];
   comments.push('Всё отлично!');
   comments.push('В целом всё неплохо. Но не всё.');
@@ -10,11 +10,11 @@ window.data = (function () {
   comments.push('Лица у людей на фотке перекошены, как-будто их избивают. Как можно было поймать такой неудачный момент?!');
 
   function generatePicture() {
-    var pictureLikes = window.utils.getRandomNumber(15, 200);
-    var commentsAmmount = window.utils.getRandomNumber(1, 2);
+    var pictureLikes = utils.getRandomNumber(15, 200);
+    var commentsAmmount = utils.getRandomNumber(1, 2);
     var pictureComments = [''];
     for (var i = 0; i < commentsAmmount; i++) {
-      var index = window.utils.getRandomNumber(0, comments.length - 1);
+      var index = utils.getRandomNumber(0, comments.length - 1);
       pictureComments[i] = comments[index];
       comments.slice(index, 1);
     }
@@ -36,4 +36,4 @@ window.data = (function () {
   }
 
   return createPicturesList;
-})();
+})(window.utils);
