@@ -1,12 +1,16 @@
 'use strict';
 
-(function (utils) {
+(function () {
   var upload = document.querySelector('.upload');
   var uploadOverlay = upload.querySelector('.upload-overlay');
   var resizeControlValue = uploadOverlay.querySelector('.upload-resize-controls-value');
   var resizeControlDec = uploadOverlay.querySelector('.upload-resize-controls-button-dec');
   var resizeControlInc = uploadOverlay.querySelector('.upload-resize-controls-button-inc');
   var uploadFilterControls = uploadOverlay.querySelector('.upload-filter-controls');
+  var filterLineBlock = uploadFilterControls.querySelector('.upload-filter-level');
+  var filterLine = uploadFilterControls.querySelector('.upload-filter-level-line');
+  var filterPin = uploadFilterControls.querySelector('.upload-filter-level-pin');
+  var filterValueLine = uploadFilterControls.querySelector('.upload-filter-level-val');
   var filterImagePreview = uploadOverlay.querySelector('.filter-image-preview');
   var commentField = uploadOverlay.querySelector('textarea');
   var uploadComment = upload.querySelector('.upload-form-description');
@@ -26,8 +30,10 @@
     croppingFormClose.addEventListener('click', onCroppingFormCloseEnterPress);
     croppingFormSubmitBtn.addEventListener('click', onCroppingFormSubmitBtnClick);
     croppingFormSubmitBtn.addEventListener('keydown', onCroppingFormSubmitBtnEnterPress);
+    filterLineBlock.classList.add('invisible');
     uploadResizeControl();
     changeFilter();
+    moveFilterPin();
   }
 
   function closeCroppingForm() {
@@ -47,14 +53,14 @@
   }
 
   function onEscPressCroppingForm(evt) {
-    if (utils.isEscPressed(evt) && document.activeElement !== uploadComment) {
+    if (window.utils.isEscPressed(evt) && document.activeElement !== uploadComment) {
       closeCroppingForm();
       openLoadForm();
     }
   }
 
   function onCroppingFormCloseEnterPress(evt) {
-    if (utils.isEnterPressed(evt) && document.activeElement === closeCroppingForm) {
+    if (window.utils.isEnterPressed(evt) && document.activeElement === closeCroppingForm) {
       closeCroppingForm();
       openLoadForm();
     }
@@ -66,7 +72,7 @@
   }
 
   function onCroppingFormSubmitBtnEnterPress(evt) {
-    if (utils.isEnterPressed(evt) && document.activeElement === croppingFormSubmitBtn) {
+    if (window.utils.isEnterPressed(evt) && document.activeElement === croppingFormSubmitBtn) {
       evt.preventDefault();
       trySubmitForm();
     }
@@ -130,13 +136,91 @@
   function changeFilter() {
     uploadFilterControls.addEventListener('click', function (evt) {
       var filterClass = evt.target.value;
-      filterImagePreview.classList.remove(currentFilter);
-      currentFilter = 'filter-' + filterClass;
-      filterImagePreview.classList.add(currentFilter);
+      var targetClass = evt.target.getAttribute('class');
+      if (targetClass !== 'upload-filter-level' && targetClass !== 'upload-filter-level-line' && targetClass !== 'upload-filter-level-pin' && targetClass !== 'upload-filter-level-val') {
+        filterImagePreview.classList.remove(currentFilter);
+        currentFilter = 'filter-' + filterClass;
+        if (currentFilter !== 'filter-none') {
+          filterLineBlock.classList.remove('invisible');
+        } else {
+          filterLineBlock.classList.add('invisible');
+          filterImagePreview.style.filter = 'none';
+        }
+        if (currentFilter !== 'filter-none') {
+          setDefaultFilterValues();
+        }
+        filterImagePreview.classList.add(currentFilter);
+      }
     });
+  }
+
+  function getCoords(elem) {
+    var box = elem.getBoundingClientRect();
+
+    return {
+      left: box.left + pageXOffset,
+      right: box.right
+    };
+
+  }
+
+  function moveFilterPin() {
+    filterPin.addEventListener('mousedown', function (evt) {
+      evt.preventDefault();
+      var startX = evt.clientX;
+      var minX = getCoords(filterLine).left;
+      var maxX = getCoords(filterLine).right;
+      var onMouseMove = function (moveEvt) {
+        moveEvt.preventDefault();
+        var shiftX = startX - moveEvt.clientX;
+        startX = moveEvt.clientX;
+        if (startX >= minX && startX <= maxX) {
+          filterPin.style.left = (filterPin.offsetLeft - shiftX) + 'px';
+          setFilterValue(minX, maxX, startX);
+        }
+      };
+      var onMouseUp = function (upEvt) {
+        upEvt.preventDefault();
+
+        document.removeEventListener('mousemove', onMouseMove);
+        document.removeEventListener('mouseup', onMouseUp);
+      };
+
+      document.addEventListener('mousemove', onMouseMove);
+      document.addEventListener('mouseup', onMouseUp);
+    });
+  }
+
+  function setFilterValue(min, max, position) {
+    if (position >= min && position <= max) {
+      var value = ((position - min) / (max - min)).toFixed(2);
+      filterValueLine.style.width = value * 100 + '%';
+      setFilterParametr(value);
+    }
+  }
+
+  function setFilterParametr(paramValue) {
+    if (currentFilter === 'filter-chrome') {
+      filterImagePreview.style.filter = 'grayscale(' + paramValue + ')';
+    } else if (currentFilter === 'filter-sepia') {
+      filterImagePreview.style.filter = 'sepia(' + paramValue + ')';
+    } else if (currentFilter === 'filter-marvin') {
+      filterImagePreview.style.filter = 'invert(' + paramValue * 100 + '%)';
+    } else if (currentFilter === 'filter-phobos') {
+      filterImagePreview.style.filter = 'blur(' + paramValue * 3 + 'px)';
+    } else if (currentFilter === 'filter-heat') {
+      filterImagePreview.style.filter = 'brightness(' + paramValue * 3 + ')';
+    }
+  }
+
+  function setDefaultFilterValues() {
+    var defaultValue = 0.2;
+    filterPin.style.left = defaultValue * 100 + '%';
+    filterValueLine.style.width = defaultValue * 100 + '%';
+    setFilterParametr(defaultValue);
   }
 
   closeCroppingForm();
   openLoadForm();
   addLoadFormChangeListener();
-})(window.utils);
+})();
