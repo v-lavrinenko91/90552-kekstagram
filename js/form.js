@@ -1,6 +1,6 @@
 'use strict';
 
-(function () {
+(function (utils) {
   var upload = document.querySelector('.upload');
   var uploadOverlay = upload.querySelector('.upload-overlay');
   var resizeControlValue = uploadOverlay.querySelector('.upload-resize-controls-value');
@@ -53,14 +53,14 @@
   }
 
   function onEscPressCroppingForm(evt) {
-    if (window.utils.isEscPressed(evt) && document.activeElement !== uploadComment) {
+    if (utils.isEscPressed(evt) && document.activeElement !== uploadComment) {
       closeCroppingForm();
       openLoadForm();
     }
   }
 
   function onCroppingFormCloseEnterPress(evt) {
-    if (window.utils.isEnterPressed(evt) && document.activeElement === closeCroppingForm) {
+    if (utils.isEnterPressed(evt) && document.activeElement === closeCroppingForm) {
       closeCroppingForm();
       openLoadForm();
     }
@@ -72,7 +72,7 @@
   }
 
   function onCroppingFormSubmitBtnEnterPress(evt) {
-    if (window.utils.isEnterPressed(evt) && document.activeElement === croppingFormSubmitBtn) {
+    if (utils.isEnterPressed(evt) && document.activeElement === croppingFormSubmitBtn) {
       evt.preventDefault();
       trySubmitForm();
     }
@@ -154,46 +154,33 @@
     });
   }
 
-  function getCoords(elem) {
-    var box = elem.getBoundingClientRect();
-
-    return {
-      left: box.left + pageXOffset,
-      right: box.right
-    };
-
-  }
-
   function moveFilterPin() {
     filterPin.addEventListener('mousedown', function (evt) {
       evt.preventDefault();
       var startX = evt.clientX;
-      var minX = getCoords(filterLine).left;
-      var maxX = getCoords(filterLine).right;
       var onMouseMove = function (moveEvt) {
         moveEvt.preventDefault();
         var shiftX = startX - moveEvt.clientX;
         startX = moveEvt.clientX;
-        if (startX >= minX && startX <= maxX) {
-          filterPin.style.left = (filterPin.offsetLeft - shiftX) + 'px';
-          setFilterValue(minX, maxX, startX);
-        }
+        setFilterValue(startX, shiftX);
       };
       var onMouseUp = function (upEvt) {
         upEvt.preventDefault();
-
         document.removeEventListener('mousemove', onMouseMove);
         document.removeEventListener('mouseup', onMouseUp);
       };
-
       document.addEventListener('mousemove', onMouseMove);
       document.addEventListener('mouseup', onMouseUp);
     });
   }
 
-  function setFilterValue(min, max, position) {
-    if (position >= min && position <= max) {
-      var value = ((position - min) / (max - min)).toFixed(2);
+  function setFilterValue(position, shift) {
+    filterPin.style.zIndex = '1';
+    var lineWidth = filterLine.clientWidth;
+    var currentOffset = filterPin.offsetLeft - shift;
+    if (currentOffset >= 0 && currentOffset <= lineWidth) {
+      filterPin.style.left = (currentOffset) + 'px';
+      var value = (currentOffset / lineWidth).toFixed(2);
       filterValueLine.style.width = value * 100 + '%';
       setFilterParametr(value);
     }
@@ -223,4 +210,4 @@
   closeCroppingForm();
   openLoadForm();
   addLoadFormChangeListener();
-})();
+})(window.utils);
